@@ -9,7 +9,7 @@ import datetime
 
 
 DATABASE = {
-    'name': 'wth.db',
+    'name': 'wth2.db',
     'engine': 'peewee.SqliteDatabase',
 }
 DEBUG = True
@@ -57,6 +57,7 @@ class SchoolClass(db.Model):
     #     super(SchoolClass, self).save(*args, **kwargs)
 
 
+
 # class HomeworkAssignment(db.Model):
 #     school_class = ForeignKeyField(SchoolClass)
 #     poster = ForeignKeyField(User)
@@ -70,28 +71,18 @@ class SchoolClass(db.Model):
 #     description = TextField(max_length=1000)
 
 class User(db.Model, BaseUser):
-    username = CharField(max_length=30)
-    password = CharField(max_length=30)
-    email = CharField()
+    username = CharField()  # need limits
+    password = CharField()
+    email = CharField()  # need validation
 
-    real_name = CharField()
-
-    is_admin = BooleanField(default=False)
+    admin = BooleanField(default=True)  ## DANGEROUS
     active = BooleanField(default=True)
 
     school = ForeignKeyField(School)
 
 
 class UserAdmin(ModelAdmin):
-    columns = ('username', 'email', 'school')
-
-
-# class UserResource(RestResource, RestrictOwnerResource):
-#     exclude = ('password', 'email', 'username',)  # not all things excluded yet
-#     owner_field = 'user'
-
-class UserResource(RestResource):
-    exclude = ('password', 'email', 'username',)  # not all things excluded yet
+    columns = ('username', 'email', 'admin')
 
 
 class CustomAuth(Auth):
@@ -101,26 +92,14 @@ class CustomAuth(Auth):
     def get_model_admin(self):
         return UserAdmin
 
-
-class CustomAdmin(Admin):
-    def check_user_permission(self, user):
-        return user.is_admin
-
 auth = CustomAuth(app, db)
-admin = CustomAdmin(app, auth)
+
+admin = Admin(app, auth)
 admin.register(School)
 admin.register(SchoolClass)
 admin.register(Teacher)
 admin.register(User, UserAdmin)
 admin.setup()
-
-# user_auth = UserAuthentication(auth)
-# api = RestAPI(app, default_auth=user_auth)
-# api.register(School)
-# api.register(SchoolClass)
-# api.register(Teacher)
-# api.register(User, UserResource)
-# api.setup()
 
 if __name__ == '__main__':
     auth.User.create_table(fail_silently=True)
