@@ -130,7 +130,7 @@ admin.register(User, UserAdmin)
 admin.register(HomeworkAssignment)
 admin.setup()
 
-@app.route('/testperms/')
+@app.route('/motd/')
 @auth.login_required
 def private():
     # import ipdb;ipdb.set_trace()
