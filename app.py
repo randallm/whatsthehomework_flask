@@ -1,4 +1,11 @@
-from flask import Flask
+# TODO:
+# * migrate to github issues tracker
+# * set limits on charfields
+# * move to postgres
+# * grab secret key from environment variable
+# * fragment app.py into multiple files (be wary of constants like MEDIA_ROOT)
+
+from flask import Flask, request
 from flask_peewee.db import Database
 from flask_peewee.auth import Auth, BaseUser
 from flask_peewee.admin import Admin, ModelAdmin
@@ -6,10 +13,11 @@ from flask_peewee.rest import RestAPI, UserAuthentication, RestResource, Restric
 from peewee import *
 from pytz import utc
 import datetime
+import subprocess
 
 
 DATABASE = {
-    'name': 'wth2.db',
+    'name': 'wth.db',
     'engine': 'peewee.SqliteDatabase',
 }
 DEBUG = True
@@ -19,6 +27,19 @@ app = Flask(__name__)
 app.config.from_object(__name__)
 
 db = Database(app)
+
+
+@app.route('/login/', methods=['POST'])
+def login():
+    user = auth.authenticate(request.form['username'],
+                             request.form['password'])
+    if user:
+        auth.login_user(user)
+        print 'hello', user.username
+        return "hello"
+    else:
+        print 'invalidlogin'
+        return "wrong"
 
 
 class School(db.Model):
@@ -57,25 +78,12 @@ class SchoolClass(db.Model):
     #     super(SchoolClass, self).save(*args, **kwargs)
 
 
-
-# class HomeworkAssignment(db.Model):
-#     school_class = ForeignKeyField(SchoolClass)
-#     poster = ForeignKeyField(User)
-#     # photo = ImageField(upload_to='hwphotos/')
-
-#     date_posted = DateTimeField(default=datetime.datetime.utcnow() \
-#                                         .replace(tzinfo=utc))
-#     date_assigned = DateTimeField(default=datetime.datetime.utcnow() \
-#                                           .replace(tzinfo=utc))
-
-#     description = TextField(max_length=1000)
-
 class User(db.Model, BaseUser):
     username = CharField()  # need limits
     password = CharField()
     email = CharField()  # need validation
 
-    admin = BooleanField(default=True)  ## DANGEROUS
+    admin = BooleanField(default=True)  # DANGEROUS
     active = BooleanField(default=True)
 
     school = ForeignKeyField(School)
@@ -92,18 +100,48 @@ class CustomAuth(Auth):
     def get_model_admin(self):
         return UserAdmin
 
-auth = CustomAuth(app, db)
 
+class HomeworkAssignment(db.Model):
+    school_class = ForeignKeyField(SchoolClass)
+    poster = ForeignKeyField(User)
+    photo = CharField(default='None')
+
+    date_posted = DateTimeField(default=datetime.datetime.utcnow() \
+                                        .replace(tzinfo=utc))
+    date_assigned = DateTimeField(default=datetime.datetime.utcnow() \
+                                          .replace(tzinfo=utc))
+
+    description = TextField(max_length=1000)
+
+    def save_photo(self, file_obj):
+        self.photo = os.path.join(MEDIA_ROOT, self.id + '.jpg')
+        self.save()
+
+    def delete_photo(self):
+        # Popen() is called because proc.wait() time is too long
+        subprocess.Popen(['rm', self.photo])  # DANGEROUS, untested
+
+auth = CustomAuth(app, db)
 admin = Admin(app, auth)
 admin.register(School)
 admin.register(SchoolClass)
 admin.register(Teacher)
 admin.register(User, UserAdmin)
+admin.register(HomeworkAssignment)
 admin.setup()
+
+@app.route('/testperms/')
+@auth.login_required
+def private():
+    # import ipdb;ipdb.set_trace()
+    return auth.get_logged_in_user().username
+    # return auth.get_logged_in_user().username, auth.get_logged_in_user().password
+    # print auth.get_logged_in_user().username, auth.get_logged_in_user().password
 
 if __name__ == '__main__':
     auth.User.create_table(fail_silently=True)
     School.create_table(fail_silently=True)
     SchoolClass.create_table(fail_silently=True)
     Teacher.create_table(fail_silently=True)
+    HomeworkAssignment.create_table(fail_silently=True)
     app.run(host='0.0.0.0')
