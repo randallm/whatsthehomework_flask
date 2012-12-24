@@ -1,10 +1,3 @@
-# TODO:
-# * migrate to github issues tracker
-# * set limits on charfields
-# * move to postgres
-# * grab secret key from environment variable
-# * fragment app.py into multiple files (be wary of constants like MEDIA_ROOT)
-
 from flask import Flask, request
 from flask_peewee.db import Database
 from flask_peewee.auth import Auth, BaseUser
