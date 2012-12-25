@@ -1,8 +1,7 @@
-from flask import Flask, request
+from flask import Flask
 from flask_peewee.db import Database
 from flask_peewee.auth import Auth, BaseUser
 from flask_peewee.admin import Admin, ModelAdmin
-from flask_peewee.rest import RestAPI, UserAuthentication, RestResource, RestrictOwnerResource
 from peewee import *
 from pytz import utc
 import datetime
@@ -20,19 +19,6 @@ app = Flask(__name__)
 app.config.from_object(__name__)
 
 db = Database(app)
-
-
-@app.route('/login/', methods=['POST'])
-def login():
-    user = auth.authenticate(request.form['username'],
-                             request.form['password'])
-    if user:
-        auth.login_user(user)
-        print 'hello', user.username
-        return "hello"
-    else:
-        print 'invalidlogin'
-        return "wrong"
 
 
 class School(db.Model):
@@ -123,18 +109,4 @@ admin.register(User, UserAdmin)
 admin.register(HomeworkAssignment)
 admin.setup()
 
-@app.route('/motd/')
-@auth.login_required
-def private():
-    # import ipdb;ipdb.set_trace()
-    return auth.get_logged_in_user().username
-    # return auth.get_logged_in_user().username, auth.get_logged_in_user().password
-    # print auth.get_logged_in_user().username, auth.get_logged_in_user().password
-
-if __name__ == '__main__':
-    auth.User.create_table(fail_silently=True)
-    School.create_table(fail_silently=True)
-    SchoolClass.create_table(fail_silently=True)
-    Teacher.create_table(fail_silently=True)
-    HomeworkAssignment.create_table(fail_silently=True)
-    app.run(host='0.0.0.0')
+import wth.views
