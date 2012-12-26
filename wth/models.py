@@ -19,6 +19,9 @@ class School(db.Model):
 class Teacher(db.Model):
     last_name = CharField(max_length=100)
 
+    def __unicode__(self):
+        return u'%s' % (self.last_name)
+
 
 class SchoolClass(db.Model):
     title = CharField(max_length=150)
@@ -42,6 +45,9 @@ class SchoolClass(db.Model):
     #     instance.title = ' '.join(class_details)
 
     #     super(SchoolClass, self).save(*args, **kwargs)
+
+    def __unicode__(self):
+        return u'%s' % (self.title)
 
 
 class User(db.Model, BaseUser):
@@ -87,3 +93,6 @@ class HomeworkAssignment(db.Model):
     def delete_photo(self):
         # Popen() is called because proc.wait() time is too long
         subprocess.Popen(['rm', self.photo])  # DANGEROUS, untested
+
+    def __unicode__(self):
+        return u'%s - %s' % (self.poster.username, self.school_class.title)
