@@ -36,3 +36,5 @@ nosetests.xml
 
 # misc
 wth.db
+wth2.db
+config.py

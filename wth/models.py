@@ -1,4 +1,4 @@
-from wth import db, MEDIA_ROOT
+from wth import app, db
 from peewee import CharField, ForeignKeyField, BooleanField, TextField, DateTimeField
 from flask_peewee.auth import Auth, BaseUser
 from flask_peewee.admin import ModelAdmin
@@ -88,7 +88,7 @@ class HomeworkAssignment(db.Model):
                             default='')
 
     def save_photo(self, file_obj):
-        self.photo = os.path.join(MEDIA_ROOT, self.id + '.jpg')
+        self.photo = os.path.join(app.config['MEDIA_ROOT'], self.id + '.jpg')
         self.save()
 
     def delete_photo(self):

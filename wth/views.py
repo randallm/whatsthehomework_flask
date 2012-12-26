@@ -23,7 +23,7 @@ def motd():
 
 
 @app.route('/hw/news/', methods=['POST'])
-@app.auth.login_required
+@auth.login_required
 def view_assignments():
     return [c for c in StudentClass.select().where(
                 StudentClass == auth.User.get(request.form['username']))]
