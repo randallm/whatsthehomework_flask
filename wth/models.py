@@ -77,7 +77,8 @@ class HomeworkAssignment(db.Model):
     date_assigned = DateTimeField(default=datetime.datetime.utcnow() \
                                           .replace(tzinfo=utc))
 
-    description = TextField(max_length=1000)
+    description = TextField(max_length=1000,
+                            default='')
 
     def save_photo(self, file_obj):
         self.photo = os.path.join(MEDIA_ROOT, self.id + '.jpg')
