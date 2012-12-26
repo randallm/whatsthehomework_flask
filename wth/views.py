@@ -1,4 +1,5 @@
 from wth import app, auth
+from wth.models import StudentClass
 from flask import request
 
 
@@ -18,12 +19,11 @@ def login():
 @app.route('/motd/')
 @auth.login_required
 def motd():
-    # import ipdb;ipdb.set_trace()
     return auth.get_logged_in_user().username
-    # return app.auth.get_logged_in_user().username, app.auth.get_logged_in_user().password
-    # print app.auth.get_logged_in_user().username, app.auth.get_logged_in_user().password
 
-# @app.route('/login/', methods=['POST'])
-# @app.route('/hw/news, methods=['POST'])
-# @app.auth.login_required
-# def post_assignment():
+
+@app.route('/hw/news/', methods=['POST'])
+@app.auth.login_required
+def view_assignments():
+    return [c for c in StudentClass.select().where(
+                StudentClass == auth.User.get(request.form['username']))]

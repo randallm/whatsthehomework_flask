@@ -29,6 +29,7 @@ class SchoolClass(db.Model):
 
     school = ForeignKeyField(School)
     teacher = ForeignKeyField(Teacher)
+
     # starting_year = IntegerField()
     # ending_year = IntegerField()
 
@@ -96,3 +97,8 @@ class HomeworkAssignment(db.Model):
 
     def __unicode__(self):
         return u'%s - %s' % (self.poster.username, self.school_class.title)
+
+
+class StudentClass(db.Model):
+    student = ForeignKeyField(User)
+    school_class = ForeignKeyField(SchoolClass)

@@ -1,10 +1,11 @@
-from wth import auth, School, SchoolClass, Teacher, HomeworkAssignment
+from wth import auth, School, SchoolClass, Teacher, HomeworkAssignment, StudentClass
 
-auth.User.create_table(fail_silently=True)
-School.create_table(fail_silently=True)
-SchoolClass.create_table(fail_silently=True)
-Teacher.create_table(fail_silently=True)
-HomeworkAssignment.create_table(fail_silently=True)
+auth.User.create_table()
+School.create_table()
+SchoolClass.create_table()
+Teacher.create_table()
+HomeworkAssignment.create_table()
+StudentClass.create_table()
 
 school = School(name='School for Troubled Treats', abbreviation='STT')
 school.save()
@@ -29,3 +30,7 @@ school_class.save()
 hw_assignment = HomeworkAssignment(school_class=SchoolClass.get(id=1),
                                    poster=auth.User.get(id=1))
 hw_assignment.save()
+
+student_class = StudentClass(student=auth.User.get(id=1),
+                             school_class=SchoolClass.get(id=1))
+student_class.save()

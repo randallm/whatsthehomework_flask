@@ -25,6 +25,7 @@ admin.register(SchoolClass)
 admin.register(Teacher)
 admin.register(User, UserAdmin)
 admin.register(HomeworkAssignment)
+admin.register(StudentClass)
 admin.setup()
 
 import wth.views
