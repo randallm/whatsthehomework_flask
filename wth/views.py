@@ -19,7 +19,10 @@ def login():
 @app.route('/motd/')
 @auth.login_required
 def motd():
-    return auth.get_logged_in_user().username
+    if auth.get_logged_in_user():
+        return auth.get_logged_in_user().username
+    else:
+        return 'False'
 
 
 @app.route('/hw/news/', methods=['POST'])
