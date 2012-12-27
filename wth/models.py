@@ -54,8 +54,8 @@ class SchoolClass(db.Model):
 
 
 class User(db.Model, BaseUser):
-    username = CharField(max_length=20)
-    password = CharField(max_length=30)
+    username = CharField()
+    password = CharField()
     email = CharField(max_length=254)
 
     admin = BooleanField(default=False)
