@@ -1,6 +1,6 @@
 from wth import app, auth
 from wth.models import StudentClass, HomeworkAssignment, SchoolClass
-from flask import request, jsonify
+from flask import request, jsonify, make_response
 import datetime
 from pytz import utc
 import itertools
@@ -19,8 +19,17 @@ def login():
         return "wrong"
 
 
+@app.route('/logout/')
+def logout():
+    if auth.get_logged_in_user():
+        auth.logout_user()
+
+    resp = make_response()
+    resp.status_code = 200
+    return resp
+
+
 @app.route('/motd/')
-@auth.login_required
 def motd():
     if auth.get_logged_in_user():
         return auth.get_logged_in_user().username
