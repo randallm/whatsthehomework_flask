@@ -12,11 +12,12 @@ def login():
                              request.form['password'])
     if user:
         auth.login_user(user)
-        print 'hello', user.username
-        return "hello"
+        resp = make_response()
+        resp.status_code = 200
+        return resp
     else:
-        print 'invalidlogin'
-        return "wrong"
+        resp = make_response("bad_user_or_pass", 200)
+        return resp
 
 
 @app.route('/logout/')
