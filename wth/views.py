@@ -107,18 +107,22 @@ def view_class_assignments(class_id, page):
 def view_dummy_news_feed():
     now = datetime.datetime.utcnow().replace(tzinfo=utc)
 
-    data = {
-        str(now): {
-            'photo': 'http://lorempixel.com/g/400/200/',
-            'date_due': str(now + datetime.timedelta(hours=2)),
-            'description': 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
-        },
-        str(now + datetime.timedelta(hours=6)): {
-            'photo': 'http://lorempixel.com/g/400/200/',
-            'date_due': str(now + datetime.timedelta(hours=8)),
-            'description': 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+    data = {'assignments': [
+        {
+            '0': {
+                'photo': 'http://lorempixel.com/g/400/200/',
+                'date_assigned': str(now),
+                'date_due': str(now + datetime.timedelta(hours=2)),
+                'description': 'Bacon ipsum dolor sit amet ground round boudin hamburger, t-bone chicken ribeye jowl short ribs strip steak corned beef andouille beef ham. Kielbasa ham hock rump pork belly fatback, t-bone spare ribs hamburger pancetta shoulder strip steak. Corned beef pork loin turducken meatloaf. Ham shank kielbasa pig, swine frankfurter salami strip steak pork. Pork pastrami turkey hamburger. Tongue ham flank ball tip filet mignon drumstick bresaola boudin swine shank pork shoulder meatball.'
+            },
+            '1': {
+                'photo': 'http://lorempixel.com/g/400/200/',
+                'date_assigned': str(now + datetime.timedelta(hours=6)),
+                'date_due': str(now + datetime.timedelta(hours=8)),
+                'description': 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+            }
         }
-    }
+    ]}
 
     resp = jsonify(data)
     resp.status_code = 200
