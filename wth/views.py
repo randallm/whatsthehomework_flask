@@ -50,7 +50,7 @@ def process_assignment_metadata(assignments):
     return data
 
 
-@app.route('/hw/news/all/<page>/', methods=['GET', 'POST'])
+@app.route('/news/all/<page>/', methods=['GET', 'POST'])
 @auth.login_required
 def view_news_feed(page):
 
@@ -88,7 +88,7 @@ def view_news_feed(page):
     return resp
 
 
-@app.route('/hw/news/<class_id>/<page>/', methods=['POST'])
+@app.route('/news/id/<class_id>/<page>/', methods=['POST'])
 @auth.login_required
 def view_class_assignments(class_id, page):
     school_class = SchoolClass.get(id=class_id)
@@ -103,18 +103,24 @@ def view_class_assignments(class_id, page):
         return resp
 
 
-@app.route('/hw/news/news/dummy/all/', methods=['POST'])
+@app.route('/news/dummy/all/', methods=['GET'])
 def view_dummy_news_feed():
-    now = str(datetime.datetime.utcnow().replace(tzinfo=utc))
+    now = datetime.datetime.utcnow().replace(tzinfo=utc)
 
     data = {
-        now: {
+        str(now): {
             'photo': 'http://lorempixel.com/g/400/200/',
-            'date_due': now,
+            'date_due': str(now + datetime.timedelta(hours=2)),
+            'description': 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+        },
+        str(now + datetime.timedelta(hours=6)): {
+            'photo': 'http://lorempixel.com/g/400/200/',
+            'date_due': str(now + datetime.timedelta(hours=8)),
             'description': 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
         }
     }
 
     resp = jsonify(data)
     resp.status_code = 200
+    resp.mimetype = 'application/json'
     return resp
