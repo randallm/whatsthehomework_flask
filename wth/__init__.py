@@ -3,7 +3,7 @@ from flask_peewee.db import Database
 from peewee import *
 from flask_peewee.admin import Admin
 from datetime import timedelta
-
+from wth.securecookie import ItsdangerousSessionInterface
 
 app = Flask(__name__)
 app.config.from_object('wth.config')
