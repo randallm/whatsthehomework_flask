@@ -123,13 +123,13 @@ def view_dummy_news_feed():
 
     data = {'assignments': [
         {
-            '0': {
+            '1': {
                 'photo': 'http://lorempixel.com/g/400/200/',
                 'date_assigned': str(now),
                 'date_due': str(now + datetime.timedelta(hours=2)),
                 'description': 'Bacon ipsum dolor sit amet ground round boudin hamburger, t-bone chicken ribeye jowl short ribs strip steak corned beef andouille beef ham. Kielbasa ham hock rump pork belly fatback, t-bone spare ribs hamburger pancetta shoulder strip steak. Corned beef pork loin turducken meatloaf. Ham shank kielbasa pig, swine frankfurter salami strip steak pork. Pork pastrami turkey hamburger. Tongue ham flank ball tip filet mignon drumstick bresaola boudin swine shank pork shoulder meatball.'
             },
-            '1': {
+            '0': {
                 'photo': 'http://lorempixel.com/g/400/200/',
                 'date_assigned': str(now + datetime.timedelta(hours=6)),
                 'date_due': str(now + datetime.timedelta(hours=8)),
