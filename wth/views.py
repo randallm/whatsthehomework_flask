@@ -117,22 +117,51 @@ def view_class_assignments(class_id, page):
         return resp
 
 
-@app.route('/news/dummy/all/', methods=['GET'])
+# first page is numbered 0, 1
+@app.route('/news/dummy/all/1/', methods=['GET'])
 def view_dummy_news_feed():
+    now = datetime.datetime.utcnow().replace(tzinfo=utc)
+
+    data = {'assignments': [
+        {
+            '0': {
+                'photo': 'http://lorempixel.com/g/400/200/',
+                'date_assigned': "3 hours ago",
+                'date_due': str(now + datetime.timedelta(hours=2)),
+                'description': 'Bacon ipsum dolor sit amet ground round boudin hamburger, t-bone chicken ribeye jowl short ribs strip steak corned beef andouille beef ham. Kielbasa ham hock rump pork belly fatback, t-bone spare ribs hamburger pancetta shoulder strip steak. Corned beef pork loin turducken meatloaf. Ham shank kielbasa pig, swine frankfurter salami strip steak pork. Pork pastrami turkey hamburger. Tongue ham flank ball tip filet mignon drumstick bresaola boudin swine shank pork shoulder meatball.'
+            },
+            '1': {
+                'photo': 'http://lorempixel.com/g/400/200/',
+                'date_assigned': "4 hours ago",
+                'date_due': str(now),
+                'description': 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+            }
+        }
+    ]}
+
+    resp = jsonify(data)
+    resp.status_code = 200
+    resp.mimetype = 'application/json'
+    return resp
+
+
+# next pages are numbered 1, 0
+@app.route('/news/dummy/all/2/', methods=['GET'])
+def view_dummy_news_feed_2():
     now = datetime.datetime.utcnow().replace(tzinfo=utc)
 
     data = {'assignments': [
         {
             '1': {
                 'photo': 'http://lorempixel.com/g/400/200/',
-                'date_assigned': str(now),
-                'date_due': str(now + datetime.timedelta(hours=2)),
+                'date_assigned': "1 hour ago",
+                'date_due': str(now + datetime.timedelta(hours=4)),
                 'description': 'Bacon ipsum dolor sit amet ground round boudin hamburger, t-bone chicken ribeye jowl short ribs strip steak corned beef andouille beef ham. Kielbasa ham hock rump pork belly fatback, t-bone spare ribs hamburger pancetta shoulder strip steak. Corned beef pork loin turducken meatloaf. Ham shank kielbasa pig, swine frankfurter salami strip steak pork. Pork pastrami turkey hamburger. Tongue ham flank ball tip filet mignon drumstick bresaola boudin swine shank pork shoulder meatball.'
             },
             '0': {
                 'photo': 'http://lorempixel.com/g/400/200/',
-                'date_assigned': str(now + datetime.timedelta(hours=6)),
-                'date_due': str(now + datetime.timedelta(hours=8)),
+                'date_assigned': "2 hours ago",
+                'date_due': str(now),
                 'description': 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
             }
         }
