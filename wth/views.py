@@ -30,12 +30,26 @@ def logout():
     return resp
 
 
+@app.route('/verifyloggedin/')
+def verify_logged_in():
+    if auth.get_logged_in_user():
+        resp = make_response()
+        resp.status_code = 200
+        return resp
+    else:
+        resp = make_response()
+        resp.status_code = 400
+        return resp
+
+
 @app.route('/motd/')
 def motd():
     if auth.get_logged_in_user():
         return auth.get_logged_in_user().username
     else:
-        return 'False'
+        resp = make_response()
+        resp.status_code = 400
+        return resp
 
 
 def process_assignment_metadata(assignments):
