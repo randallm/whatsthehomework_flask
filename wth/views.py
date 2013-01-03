@@ -1,4 +1,4 @@
-from wth import app, auth
+from wth import app, auth, db
 from wth.models import StudentClass, HomeworkAssignment, SchoolClass
 from flask import request, jsonify, make_response
 import datetime
@@ -52,69 +52,135 @@ def motd():
         return resp
 
 
-def process_assignment_metadata(assignments):
-    data = {}
+def process_assignments(assignments, orientation):
+    # orientation='forward' means 0, 1 counting
+    # orientation='backwards' means 1,0 counting
+
+    data = {'assignments': [{}]}
+    counter = 0
     for assignment in assignments:
-        data[str(assignment.date_posted)] = {
+        assignment_details = {
+            'pk': assignment.id,
+            'poster': assignment.poster.username,
             'photo': assignment.get_photo_uri(),
+            'date_posted': str(assignment.date_posted),
             'date_due': str(assignment.date_due),
             'description': assignment.description
         }
 
-    return data
+        data['assignments'][0][str(counter)] = assignment_details
+        counter += 1
 
-
-@app.route('/news/all/<page>/', methods=['GET', 'POST'])
-@auth.login_required
-def view_news_feed(page):
-
-    def tomorrow():
-        now = datetime.datetime.utcnow().replace(tzinfo=utc)
-        day = datetime.timedelta(days=1)
-        return now + day
-
-    def paginate(iterable, page_size):
-        while True:
-            i1, i2 = itertools.tee(iterable)
-            iterable, page = (itertools.islice(i1, page_size, None),
-                    list(itertools.islice(i2, page_size)))
-            if len(page) == 0:
-                break
-            yield page
-
-    classes = [c for c in StudentClass.select().where(
-        StudentClass.student.id == auth.get_logged_in_user().id)]
-
-    assignments = []
-
-    for c in classes:
-        assignments.append(HomeworkAssignment.select().where(
-            HomeworkAssignment.school_class == c and \
-            HomeworkAssignment.date_due > tomorrow()))
-
-    assignments.sort(key=lambda a: a.date_posted)
-
-    assignments = list(paginate(assignments, 10))
-    assignments = assignments[page]
-
-    resp = jsonify(process_assignment_metadata(assignments))
+    resp = jsonify(data)
     resp.status_code = 200
     return resp
 
 
-@app.route('/news/id/<class_id>/<page>/', methods=['POST'])
-@auth.login_required
-def view_class_assignments(class_id, page):
-    school_class = SchoolClass.get(id=class_id)
+@app.route('/news/new/all/')
+def news_feed():
 
-    if StudentClass.get(student=auth.get_logged_in_user,
-                        school_class=school_class):
+    # get list of classes of logged in user
+    classes = [c for c in StudentClass.select().where(
+        StudentClass.student == auth.get_logged_in_user().id)]
 
-        assignments = [a for a in HomeworkAssignment.select().where(HomeworkAssignment.school_class == school_class).order_by(HomeworkAssignment.date_posted).paginate(page, 10)]
+    # builds query:
+    # SELECT * FROM HomeworkAssignment
+    # WHERE school_class = 1
+    # OR school_class = 2...
+    query = 'HomeworkAssignment.select().where('
+    for i in xrange(0, len(classes)):
+        query += '(HomeworkAssignment.school_class == ' + \
+            'classes[' + str(i) + '])'
+        if i != (len(classes) - 1):
+            query += ' | '
+        else:
+            query += ')'
 
-        resp = jsonify(process_assignment_metadata(assignments))
+    assignments = [a for a in eval(query)]
+    assignments.sort(key=lambda a: a.date_posted, reverse=True)
+    assignments = assignments[:15]
+
+    process_assignments(assignments)
+
+
+@app.route('/news/new/all/<latest_pk>/')
+def update_news_feed(latest_pk):
+
+    classes = [c for c in StudentClass.select().where(
+        StudentClass.student == auth.get_logged_in_user().id)]
+
+    # SELECT * FROM HomeworkAssignment
+    # WHERE school_class = 1 & id > 123
+    # OR school_class = 2 & id > 123...
+    query = 'HomeworkAssignment.select().where('
+    for i in xrange(0, len(classes)):
+        query += '(HomeworkAssignment.school_class == ' + \
+            'classes[' + str(i) + '] & HomeworkAssignment.id > ' + str(latest_pk) + ')'
+        if i != (len(classes) - 1):
+            query += ' | '
+        else:
+            query += ')'
+
+    assignments = [a for a in eval(query)]
+    if len(assignments) > 15:
+        resp = make_response('clear_feed')
         resp.status_code = 200
         return resp
+    else:
+        assignments.sort(key=lambda a: a.date_posted, reverse=True)
+        process_assignments(assignments)
+
+
+@app.route('/news/old/all/<oldest_pk>/')
+def older_news_feed(oldest_pk):
+
+    classes = [c for c in StudentClass.select().where(
+        StudentClass.student == auth.get_logged_in_user().id)]
+
+    # SELECT * FROM HomeworkAssignment
+    # WHERE school_class = 1 & id < 123
+    # OR school_class = 2 & id < 123...
+    query = 'HomeworkAssignment.select().where('
+    for i in xrange(0, len(classes)):
+        query += '(HomeworkAssignment.school_class == ' + \
+            'classes[' + str(i) + '] & HomeworkAssignment.id < ' + str(oldest_pk) + ')'
+        if i != (len(classes) - 1):
+            query += ' | '
+        else:
+            query += ')'
+
+    assignments = [a for a in eval(query)]
+    assignments.sort(key=lambda a: a.date_posted, reverse=True)
+    process_assignments(assignments)
+
+
+@app.route('/news/new/id/<class_id>/')
+def class_feed(class_id):
+
+    assignments = [a for a in HomeworkAssignment.select().where(
+        HomeworkAssignment.school_class == class_id)]
+    assignments.sort(key=lambda a: a.date_posted, reverse=True)
+    assignments = assignments[:15]
+
+    process_assignments(assignments)
+
+
+@app.route('/news/new/id/<class_id>/<latest_pk>/')
+def update_class_feed(class_id, latest_pk):
+
+    assignments = [a for a in HomeworkAssignment.select().where(
+        HomeworkAssignment.school_class == class_id & HomeworkAssignment.id > latest_pk)]
+    assignments.sort(key=lambda a: a.date_posted, reverse=True)
+    process_assignments(assignments)
+
+
+@app.route('/news/old/id/<class_id>/<oldest_pk>/')
+def older_class_feed(class_id, oldest_pk):
+
+    assignments = [a for a in HomeworkAssignment.select().where(
+        HomeworkAssignment.school_class == class_id & HomeworkAssignment.id < oldest_pk)]
+    assignments.sort(key=lambda a: a.date_posted, reverse=True)
+    process_assignments(assignments)
 
 
 # first page is numbered 0, 1
@@ -125,12 +191,14 @@ def view_dummy_news_feed():
     data = {'assignments': [
         {
             '0': {
+                'pk': 1,
                 'photo': 'http://lorempixel.com/g/400/200/',
                 'date_assigned': "3 hours ago",
                 'date_due': str(now + datetime.timedelta(hours=2)),
                 'description': 'Bacon ipsum dolor sit amet ground round boudin hamburger, t-bone chicken ribeye jowl short ribs strip steak corned beef andouille beef ham. Kielbasa ham hock rump pork belly fatback, t-bone spare ribs hamburger pancetta shoulder strip steak. Corned beef pork loin turducken meatloaf. Ham shank kielbasa pig, swine frankfurter salami strip steak pork. Pork pastrami turkey hamburger. Tongue ham flank ball tip filet mignon drumstick bresaola boudin swine shank pork shoulder meatball.'
             },
             '1': {
+                'pk': 0,
                 'photo': 'http://lorempixel.com/g/400/200/',
                 'date_assigned': "4 hours ago",
                 'date_due': str(now),
@@ -153,12 +221,14 @@ def view_dummy_news_feed_2():
     data = {'assignments': [
         {
             '1': {
+                'pk': 4,
                 'photo': 'http://lorempixel.com/g/400/200/',
                 'date_assigned': "1 hour ago",
                 'date_due': str(now + datetime.timedelta(hours=4)),
                 'description': 'Bacon ipsum dolor sit amet ground round boudin hamburger, t-bone chicken ribeye jowl short ribs strip steak corned beef andouille beef ham. Kielbasa ham hock rump pork belly fatback, t-bone spare ribs hamburger pancetta shoulder strip steak. Corned beef pork loin turducken meatloaf. Ham shank kielbasa pig, swine frankfurter salami strip steak pork. Pork pastrami turkey hamburger. Tongue ham flank ball tip filet mignon drumstick bresaola boudin swine shank pork shoulder meatball.'
             },
             '0': {
+                'pk': 3,
                 'photo': 'http://lorempixel.com/g/400/200/',
                 'date_assigned': "2 hours ago",
                 'date_due': str(now),

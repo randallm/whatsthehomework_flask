@@ -98,8 +98,9 @@ class HomeworkAssignment(db.Model):
 
     date_posted = DateTimeField(default=datetime.datetime.utcnow() \
                                         .replace(tzinfo=utc))
-    date_assigned = DateTimeField(default=datetime.datetime.utcnow() \
-                                          .replace(tzinfo=utc))
+    date_due = DateTimeField(default=datetime.datetime.utcnow() \
+                                          .replace(tzinfo=utc) \
+                                          + datetime.timedelta(days=3))
 
     description = TextField(max_length=1000,
                             default='')

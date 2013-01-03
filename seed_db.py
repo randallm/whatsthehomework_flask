@@ -1,4 +1,6 @@
 from wth import auth, School, SchoolClass, Teacher, HomeworkAssignment, StudentClass
+import datetime
+from pytz import utc
 
 auth.User.create_table()
 School.create_table()
@@ -27,9 +29,16 @@ school_class = SchoolClass(title='Crumpets 2013-2014 AP Tastiness',
                            teacher=Teacher.get(id=1))
 school_class.save()
 
-hw_assignment = HomeworkAssignment(school_class=SchoolClass.get(id=1),
-                                   poster=auth.User.get(id=1))
-hw_assignment.save()
+for i in xrange(0, 50):
+    time_offset = datetime.timedelta(minutes=i * 2)
+    now = datetime.datetime.utcnow().replace(tzinfo=utc)
+    fake_now = now + time_offset
+
+    hw_assignment = HomeworkAssignment(school_class=SchoolClass.get(id=1),
+                                       poster=auth.User.get(id=1),
+                                       date_posted=fake_now,
+                                       date_due=fake_now + datetime.timedelta(days=1))
+    hw_assignment.save()
 
 student_class = StudentClass(student=auth.User.get(id=1),
                              school_class=SchoolClass.get(id=1))
