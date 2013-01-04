@@ -1,5 +1,5 @@
 from wth import app, auth, db
-from wth.models import StudentClass, HomeworkAssignment, SchoolClass
+from wth.models import StudentClass, HomeworkAssignment
 from flask import request, jsonify, make_response
 import datetime
 from pytz import utc
@@ -52,24 +52,37 @@ def motd():
         return resp
 
 
-def process_assignments(assignments, orientation):
-    # orientation='forward' means 0, 1 counting
-    # orientation='backwards' means 1,0 counting
+def process_assignments(assignments, reverse=False):
+    # reverse should change the numbering of the counter to work backwards
+    # because the assignments need to be prepended to an array in the app
+    # ONLY for <latest_pk> methods
 
     data = {'assignments': [{}]}
-    counter = 0
+
+    if len(assignments) > 15:
+        data['assignments'][0][15] = 'true'
+        resp = jsonify(data)
+        resp.status_code = 200
+        return resp
+
+    if reverse:
+        counter = 0
+    else:
+        counter = len(assignments) - 1
+
     for assignment in assignments:
-        assignment_details = {
+        data['assignments'][0][counter] = {
             'pk': assignment.id,
             'poster': assignment.poster.username,
-            'photo': assignment.get_photo_uri(),
-            'date_posted': str(assignment.date_posted),
+            'photo': assignment.photo,
+            'date_assigned': str(assignment.date_assigned),
             'date_due': str(assignment.date_due),
             'description': assignment.description
         }
-
-        data['assignments'][0][str(counter)] = assignment_details
-        counter += 1
+        if reverse:
+            counter += 1
+        else:
+            counter -= 1
 
     resp = jsonify(data)
     resp.status_code = 200
@@ -78,7 +91,6 @@ def process_assignments(assignments, orientation):
 
 @app.route('/news/new/all/')
 def news_feed():
-
     # get list of classes of logged in user
     classes = [c for c in StudentClass.select().where(
         StudentClass.student == auth.get_logged_in_user().id)]
@@ -97,15 +109,14 @@ def news_feed():
             query += ')'
 
     assignments = [a for a in eval(query)]
-    assignments.sort(key=lambda a: a.date_posted, reverse=True)
-    assignments = assignments[:15]
+    assignments.sort(key=lambda a: a.id, reverse=False)
+    assignments = assignments[-15:]
+    return process_assignments(assignments)
 
-    process_assignments(assignments)
 
-
+# UNTESTED for multiple studentclasses
 @app.route('/news/new/all/<latest_pk>/')
 def update_news_feed(latest_pk):
-
     classes = [c for c in StudentClass.select().where(
         StudentClass.student == auth.get_logged_in_user().id)]
 
@@ -115,20 +126,20 @@ def update_news_feed(latest_pk):
     query = 'HomeworkAssignment.select().where('
     for i in xrange(0, len(classes)):
         query += '(HomeworkAssignment.school_class == ' + \
-            'classes[' + str(i) + '] & HomeworkAssignment.id > ' + str(latest_pk) + ')'
+            'classes[' + str(i) + ']) & (HomeworkAssignment.id > ' + str(latest_pk) + ')'
         if i != (len(classes) - 1):
             query += ' | '
         else:
             query += ')'
 
     assignments = [a for a in eval(query)]
-    if len(assignments) > 15:
-        resp = make_response('clear_feed')
-        resp.status_code = 200
-        return resp
-    else:
-        assignments.sort(key=lambda a: a.date_posted, reverse=True)
-        process_assignments(assignments)
+    # if len(assignments) > 15:
+    #     clear_feed_data = {'assignments': [{'clear_feed':0}]}
+    #     resp = jsonify(clear_feed_data)
+    #     return resp
+    # else:
+    assignments.sort(key=lambda a: a.id, reverse=True)
+    return process_assignments(assignments)
 
 
 @app.route('/news/old/all/<oldest_pk>/')
@@ -143,15 +154,16 @@ def older_news_feed(oldest_pk):
     query = 'HomeworkAssignment.select().where('
     for i in xrange(0, len(classes)):
         query += '(HomeworkAssignment.school_class == ' + \
-            'classes[' + str(i) + '] & HomeworkAssignment.id < ' + str(oldest_pk) + ')'
+            'classes[' + str(i) + ']) & (HomeworkAssignment.id < ' + str(oldest_pk) + ')'
         if i != (len(classes) - 1):
             query += ' | '
         else:
             query += ')'
 
     assignments = [a for a in eval(query)]
-    assignments.sort(key=lambda a: a.date_posted, reverse=True)
-    process_assignments(assignments)
+    assignments.sort(key=lambda a: a.id, reverse=True)
+    assignments = assignments[-15:]
+    return process_assignments(assignments)
 
 
 @app.route('/news/new/id/<class_id>/')
@@ -159,28 +171,34 @@ def class_feed(class_id):
 
     assignments = [a for a in HomeworkAssignment.select().where(
         HomeworkAssignment.school_class == class_id)]
-    assignments.sort(key=lambda a: a.date_posted, reverse=True)
-    assignments = assignments[:15]
+    assignments.sort(key=lambda a: a.id, reverse=True)
+    assignments = assignments[-15:]
 
-    process_assignments(assignments)
+    return process_assignments(assignments)
 
 
 @app.route('/news/new/id/<class_id>/<latest_pk>/')
 def update_class_feed(class_id, latest_pk):
 
-    assignments = [a for a in HomeworkAssignment.select().where(
-        HomeworkAssignment.school_class == class_id & HomeworkAssignment.id > latest_pk)]
-    assignments.sort(key=lambda a: a.date_posted, reverse=True)
-    process_assignments(assignments)
+    assignments = [a for a in HomeworkAssignment.select().where((HomeworkAssignment.school_class == class_id) & (HomeworkAssignment.id > latest_pk))]
+    assignments.sort(key=lambda a: a.id, reverse=True)
+    if len(assignments) > 15:
+        clear_feed_data = {'assignments': [{'0':{'clear_feed':'true'}}]}
+        resp = jsonify(clear_feed_data)
+        return resp
+    else:
+        assignments.sort(key=lambda a: a.id, reverse=True)
+        return process_assignments(assignments)
 
 
 @app.route('/news/old/id/<class_id>/<oldest_pk>/')
 def older_class_feed(class_id, oldest_pk):
 
-    assignments = [a for a in HomeworkAssignment.select().where(
-        HomeworkAssignment.school_class == class_id & HomeworkAssignment.id < oldest_pk)]
-    assignments.sort(key=lambda a: a.date_posted, reverse=True)
-    process_assignments(assignments)
+    assignments = [a for a in HomeworkAssignment.select().where((
+        HomeworkAssignment.school_class == class_id) & (HomeworkAssignment.id < oldest_pk))]
+    assignments.sort(key=lambda a: a.id, reverse=True)
+    assignments = assignments[-15:]
+    return process_assignments(assignments)
 
 
 # first page is numbered 0, 1

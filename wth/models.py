@@ -96,7 +96,7 @@ class HomeworkAssignment(db.Model):
     poster = ForeignKeyField(User)
     photo = CharField(default='None')
 
-    date_posted = DateTimeField(default=datetime.datetime.utcnow() \
+    date_assigned = DateTimeField(default=datetime.datetime.utcnow() \
                                         .replace(tzinfo=utc))
     date_due = DateTimeField(default=datetime.datetime.utcnow() \
                                           .replace(tzinfo=utc) \
