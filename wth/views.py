@@ -109,7 +109,7 @@ def news_feed():
             query += ')'
 
     assignments = [a for a in eval(query)]
-    assignments.sort(key=lambda a: a.id, reverse=False)
+    assignments.sort(key=lambda a: a.id)
     assignments = assignments[-15:]
     return process_assignments(assignments)
 
@@ -160,42 +160,44 @@ def older_news_feed(oldest_pk):
         else:
             query += ')'
 
+    # import ipdb;ipdb.set_trace()
+
     assignments = [a for a in eval(query)]
-    assignments.sort(key=lambda a: a.id, reverse=True)
+    assignments.sort(key=lambda a: a.id)
     assignments = assignments[-15:]
     return process_assignments(assignments)
 
 
-@app.route('/news/new/id/<class_id>/')
-def class_feed(class_id):
+# @app.route('/news/new/id/<class_id>/')
+# def class_feed(class_id):
 
-    assignments = [a for a in HomeworkAssignment.select().where(
-        HomeworkAssignment.school_class == class_id)]
-    assignments.sort(key=lambda a: a.id, reverse=True)
-    assignments = assignments[-15:]
+#     assignments = [a for a in HomeworkAssignment.select().where(
+#         HomeworkAssignment.school_class == class_id)]
+#     assignments.sort(key=lambda a: a.id)
+#     assignments = assignments[-15:]
 
-    return process_assignments(assignments)
-
-
-@app.route('/news/new/id/<class_id>/<latest_pk>/')
-def update_class_feed(class_id, latest_pk):
-
-    assignments = [a for a in HomeworkAssignment.select().where((HomeworkAssignment.school_class == class_id) & (HomeworkAssignment.id > latest_pk))]
-    assignments.sort(key=lambda a: a.id, reverse=True)
-    if len(assignments) > 15:
-        clear_feed_data = {'assignments': [{'0':{'clear_feed':'true'}}]}
-        resp = jsonify(clear_feed_data)
-        return resp
-    else:
-        assignments.sort(key=lambda a: a.id, reverse=True)
-        return process_assignments(assignments)
+#     return process_assignments(assignments)
 
 
-@app.route('/news/old/id/<class_id>/<oldest_pk>/')
-def older_class_feed(class_id, oldest_pk):
+# @app.route('/news/new/id/<class_id>/<latest_pk>/')
+# def update_class_feed(class_id, latest_pk):
 
-    assignments = [a for a in HomeworkAssignment.select().where((
-        HomeworkAssignment.school_class == class_id) & (HomeworkAssignment.id < oldest_pk))]
-    assignments.sort(key=lambda a: a.id, reverse=True)
-    assignments = assignments[-15:]
-    return process_assignments(assignments)
+#     assignments = [a for a in HomeworkAssignment.select().where((HomeworkAssignment.school_class == class_id) & (HomeworkAssignment.id > latest_pk))]
+#     assignments.sort(key=lambda a: a.id, reverse=True)
+#     if len(assignments) > 15:
+#         clear_feed_data = {'assignments': [{'0':{'clear_feed':'true'}}]}
+#         resp = jsonify(clear_feed_data)
+#         return resp
+#     else:
+#         assignments.sort(key=lambda a: a.id, reverse=True)
+#         return process_assignments(assignments)
+
+
+# @app.route('/news/old/id/<class_id>/<oldest_pk>/')
+# def older_class_feed(class_id, oldest_pk):
+
+#     assignments = [a for a in HomeworkAssignment.select().where((
+#         HomeworkAssignment.school_class == class_id) & (HomeworkAssignment.id < oldest_pk))]
+#     assignments.sort(key=lambda a: a.id, reverse=True)
+#     assignments = assignments[-15:]
+#     return process_assignments(assignments)
