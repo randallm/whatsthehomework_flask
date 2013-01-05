@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_peewee.db import Database
-from peewee import *
+# from peewee import *
 from flask_peewee.admin import Admin
 from datetime import timedelta
 from wth.securecookie import ItsdangerousSessionInterface
@@ -17,13 +17,13 @@ db = Database(app)
 from wth.models import *
 
 auth = CustomAuth(app, db)
-admin = Admin(app, auth)
-admin.register(School)
-admin.register(SchoolClass)
-admin.register(Teacher)
-admin.register(User, UserAdmin)
-admin.register(HomeworkAssignment)
-admin.register(StudentClass)
-admin.setup()
+# admin = Admin(app, auth)
+# admin.register(School)
+# admin.register(SchoolClass)
+# admin.register(Teacher)
+# admin.register(User, UserAdmin)
+# admin.register(HomeworkAssignment)
+# admin.register(StudentClass)
+# admin.setup()
 
 import wth.views
