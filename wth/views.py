@@ -1,8 +1,12 @@
-from wth import app, auth, db
-from wth.models import StudentClass, HomeworkAssignment
+from wth import app, auth
 from flask import request, jsonify, make_response
-import datetime
+import base64
+
+# for queries being eval()'d:
+from wth import db
+from wth.models import StudentClass, HomeworkAssignment
 from pytz import utc
+import datetime
 import itertools
 
 
@@ -71,10 +75,16 @@ def process_assignments(assignments, reverse=False):
         counter = len(assignments) - 1
 
     for assignment in assignments:
+        if assignment.thumbnail:
+            with open(assignment.thumbnail, 'rb') as f:
+                thumbnail = base64.b64encode(f.read())
+        else:
+            thumbnail = 'None'
+
         data['assignments'][0][counter] = {
             'pk': assignment.id,
             'poster': assignment.poster.username,
-            'photo': assignment.photo,
+            'thumbnail': thumbnail,
             'date_assigned': str(assignment.date_assigned),
             'date_due': str(assignment.date_due),
             'description': assignment.description

@@ -94,7 +94,8 @@ class CustomAuth(Auth):
 class HomeworkAssignment(db.Model):
     school_class = ForeignKeyField(SchoolClass)
     poster = ForeignKeyField(User)
-    photo = CharField(default='None')
+    photo = CharField(default='')
+    thumbnail = CharField(default='')
 
     date_assigned = DateTimeField(default=datetime.datetime.utcnow() \
                                         .replace(tzinfo=utc))
@@ -107,6 +108,7 @@ class HomeworkAssignment(db.Model):
 
     def save_photo(self, file_obj):
         self.photo = os.path.join(app.config['MEDIA_ROOT'], self.id + '.jpg')
+        self.thumbnail = os.path.join(app.config['MEDIA_ROOT'], 't' + self.id + '.jpg')
         self.save()
 
     def delete_photo(self):

@@ -1,6 +1,7 @@
-from wth import auth, School, SchoolClass, Teacher, HomeworkAssignment, StudentClass
-import datetime
+from wth import auth, app, School, SchoolClass, Teacher, HomeworkAssignment, StudentClass
 from pytz import utc
+import datetime
+import os
 
 
 def init_school():
@@ -46,7 +47,8 @@ def add_more_assignments(assignments=20):
         hw_assignment = HomeworkAssignment(school_class=SchoolClass.get(id=1),
                                            poster=auth.User.get(id=1),
                                            date_posted=fake_now,
-                                           date_due=fake_now + datetime.timedelta(days=1))
+                                           date_due=fake_now + datetime.timedelta(days=1),
+                                           thumbnail=os.path.join(app.config['MEDIA_ROOT'], 't1.jpg'))
         hw_assignment.save()
 
 
