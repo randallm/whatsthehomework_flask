@@ -10,7 +10,7 @@ import datetime
 import itertools
 
 
-@app.route('/login/', methods=['POST'])
+@app.route('/user/login/', methods=['POST'])
 def login():
     user = auth.authenticate(request.form['username'],
                              request.form['password'])
@@ -24,7 +24,7 @@ def login():
         return resp
 
 
-@app.route('/logout/')
+@app.route('/user/logout/')
 def logout():
     if auth.get_logged_in_user():
         auth.logout_user()
@@ -34,7 +34,7 @@ def logout():
     return resp
 
 
-@app.route('/verifyloggedin/')
+@app.route('/user/verify_logged_in/')
 def verify_logged_in():
     if auth.get_logged_in_user():
         resp = make_response()
@@ -46,7 +46,7 @@ def verify_logged_in():
         return resp
 
 
-@app.route('/motd/')
+@app.route('/user/motd/')
 def motd():
     if auth.get_logged_in_user():
         return auth.get_logged_in_user().username
