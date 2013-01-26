@@ -56,6 +56,18 @@ def motd():
         return resp
 
 
+@app.route('/user/classes/')
+def user_classes():
+    classes = [c for c in StudentClass.select().where(
+        StudentClass.student == auth.get_logged_in_user().id)]
+    data = {}
+    for c in classes:
+        data[c.school_class.id] = c.school_class.title
+    resp = jsonify(data)
+    resp.status_code = 200
+    return resp
+
+
 def process_assignments(assignments, reverse=False):
     # reverse should change the numbering of the counter to work backwards
     # because the assignments need to be prepended to an array in the app
