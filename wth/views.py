@@ -1,10 +1,14 @@
 from wth import app, auth
 from flask import request, jsonify, make_response
+from wth.models import StudentClass, SchoolClass, School
+import lepl.apps.rfc3696
 import base64
+import os
+import re
 
 # for queries being eval()'d:
 from wth import db
-from wth.models import StudentClass, HomeworkAssignment
+from wth.models import HomeworkAssignment
 from pytz import utc
 import datetime
 import itertools
@@ -66,6 +70,96 @@ def user_classes():
     resp = jsonify(data)
     resp.status_code = 200
     return resp
+
+
+@app.route('/user/new_student/', methods=['POST'])
+def user_new_student():
+    required_fields = ['username', 'real_name', 'email', 'school_id', 'password']
+    for field in required_fields:
+        if not request.form[field]:
+            resp = make_response('missing_' + field)
+            resp.status_code = 501
+            return resp
+
+    username = request.form['username']
+    if auth.User.get(username=username):
+        resp = make_response('duplicate_username')
+        resp.status_code = 501
+        return resp
+    if not re.match(r'^[a-z0-9_-]{3,20}$', username):
+        # lowercase alphanumeric, hyphens/underscores, 3-20 chars
+        resp = make_response('invalid_username')
+        resp.status_code = 501
+        return resp
+
+    password = request.form['password']
+    if not re.match(r'^.{6,30}$', password):
+        # wildcard 6-30 chars
+        resp = make_response('invalid_password')
+        resp.status_code = 501
+        return resp
+
+    email = request.form['email']
+    if auth.User.get(email=email):
+        resp = make_response('duplicate_email')
+        resp.status_code = 501
+        return resp
+    email_validator = lepl.apps.rfc3696.Email()
+    if not email_validator(email):
+        resp = make_response('invalid_email')
+        resp.status_code = 501
+        return resp
+
+    real_name = request.form['username']
+    school_id = int(request.form['school_id'])
+
+    user = auth.User(username=username,
+                     real_name=real_name,
+                     is_admin=False,
+                     active=True,
+                     email=email,
+                     school=School.get(id=school_id))
+    user.set_password(password)
+    user.save()
+
+    resp = make_response()
+    resp.status_code = 200
+    return resp
+
+
+@app.route('/user/add_class/', methods=['POST'])
+def user_add_class():
+    student_class = StudentClass(student=auth.get_logged_in_user(),
+                                 school_class=SchoolClass.get(id=request.form['school_class']))
+    student_class.save()
+
+    resp = make_response()
+    resp.status_code = 200
+    return resp
+
+
+@app.route('/user/new_class/', methods=['POST'])
+def user_new_class():
+    school_class = SchoolClass(title=request.form['title'],
+                               school=School.get(id=request.form['school']))
+    school_class.save()
+
+    resp = make_response()
+    resp.status_code = 200
+    return resp
+
+
+# @app.route('/hw/new_assignment/', methods=['POST'])
+# def hw_new_assignment():
+#     # this probably isn't going to work: you should think it out before actually testing this
+#     new_assignment = str([a for a in HomeworkAssignment.select()][-1].id + 1) + '.jpg'
+#     with open(os.path.join(app.config['MEDIA_ROOT'], new_assignment), 'w') as f:
+#         f.write(request.form['b64_photo'])
+
+#     hw = HomeworkAssignment(school_class=SchoolClass.get(id=request.form['class']),
+#                             poster=auth.get_logged_in_user(),
+#                             photo=os.path.join(app.config['MEDIA_ROOT'], new_assignment),
+#                             thumbnail=os.path.join(app.config))
 
 
 def process_assignments(assignments, reverse=False):

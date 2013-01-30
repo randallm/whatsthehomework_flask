@@ -3,11 +3,9 @@ from peewee import CharField, ForeignKeyField, BooleanField, TextField, DateTime
 from flask_peewee.auth import Auth, BaseUser
 from flask_peewee.admin import ModelAdmin
 from pytz import utc
-import lepl.apps.rfc3696
 import datetime
 import subprocess
 import os
-import re
 
 
 class School(db.Model):
@@ -18,19 +16,11 @@ class School(db.Model):
         return u'%s (%s)' % (self.name, self.abbreviation)
 
 
-class Teacher(db.Model):
-    last_name = CharField(max_length=30)
-
-    def __unicode__(self):
-        return u'%s' % (self.last_name)
-
-
 class SchoolClass(db.Model):
     title = CharField(max_length=150)
     # class_name = CharField(max_length=50)
 
     school = ForeignKeyField(School)
-    teacher = ForeignKeyField(Teacher)
 
     # starting_year = IntegerField()
     # ending_year = IntegerField()
@@ -42,7 +32,6 @@ class SchoolClass(db.Model):
     #                                   form.ending_year)
 
     #     class_details = [instance.school.abbreviation,
-    #                      instance.teacher.last_name,
     #                      instance.class_name,
     #                      verbose_year]
     #     instance.title = ' '.join(class_details)
@@ -54,29 +43,14 @@ class SchoolClass(db.Model):
 
 
 class User(db.Model, BaseUser):
-    username = CharField()
+    username = CharField(unique=True)
     password = CharField()
-    email = CharField(max_length=254)
+    email = CharField(max_length=254, unique=True)
 
     admin = BooleanField(default=False)
     active = BooleanField(default=True)
 
     school = ForeignKeyField(School)
-
-    def validate_username(u):
-        # lowercase alphanumeric, hyphens/underscores, 3-20 chars
-        if not re.match(r'^[a-z0-9_-]{3,20}$', u):
-            return 'bad_username'
-
-    def validate_password(p):
-        # wildcard 6-30 chars
-        if not re.match(r'^.{6,30}$', p):
-            return 'bad_password'
-
-    def validate_email(e):
-        email_validator = lepl.apps.rfc3696.Email()
-        if not email_validator(e):
-            return 'bad_email'
 
 
 class UserAdmin(ModelAdmin):

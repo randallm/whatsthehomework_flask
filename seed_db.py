@@ -1,4 +1,4 @@
-from wth import auth, app, School, SchoolClass, Teacher, HomeworkAssignment, StudentClass
+from wth import auth, app, School, SchoolClass, HomeworkAssignment, StudentClass
 from pytz import utc
 import datetime
 import os
@@ -20,15 +20,9 @@ def init_admin():
     user.save()
 
 
-def init_teacher():
-    teacher = Teacher(last_name='Crumpets')
-    teacher.save()
-
-
 def init_school_class():
     school_class = SchoolClass(title='Crumpets 2013-2014 AP Tastiness',
-                               school=School.get(id=1),
-                               teacher=Teacher.get(id=1))
+                               school=School.get(id=1))
     school_class.save()
 
 
@@ -56,13 +50,11 @@ if __name__ == '__main__':
     auth.User.create_table(fail_silently=True)
     School.create_table(fail_silently=True)
     SchoolClass.create_table(fail_silently=True)
-    Teacher.create_table(fail_silently=True)
     HomeworkAssignment.create_table(fail_silently=True)
     StudentClass.create_table(fail_silently=True)
 
     init_school()
     init_admin()
-    init_teacher()
     init_school_class()
     init_student_class()
     add_more_assignments()
