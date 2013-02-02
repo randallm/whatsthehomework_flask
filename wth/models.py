@@ -6,6 +6,7 @@ from pytz import utc
 import datetime
 import subprocess
 import os
+import base64
 
 
 class School(db.Model):
@@ -80,7 +81,15 @@ class HomeworkAssignment(db.Model):
     description = TextField(max_length=1000,
                             default='')
 
-    def save_photo(self, file_obj):
+    def save_photo(self, b64_photo):
+        with open(os.path.join(app.config['MEDIA_ROOT'], str(self.id) + '.jpg'), 'w') as f:
+            ## TODO: PIL compress image
+            f.write(base64.b64decode(b64_photo))
+
+        with open(os.path.join(app.config['MEDIA_ROOT'], 't' + str(self.id) + '.jpg'), 'w') as f:
+            ## TODO: PIL compress and resize image
+            f.write(base64.b64decode(b64_photo))
+
         self.photo = os.path.join(app.config['MEDIA_ROOT'], self.id + '.jpg')
         self.thumbnail = os.path.join(app.config['MEDIA_ROOT'], 't' + self.id + '.jpg')
         self.save()
@@ -88,6 +97,7 @@ class HomeworkAssignment(db.Model):
     def delete_photo(self):
         # Popen() is called because proc.wait() time is too long
         subprocess.Popen(['rm', self.photo])  # DANGEROUS, untested
+        subprocess.Popen(['rm', self.thumbnail])
 
     def __unicode__(self):
         return u'%s - %s' % (self.poster.username, self.school_class.title)

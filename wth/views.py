@@ -16,6 +16,13 @@ import itertools
 
 @app.route('/user/login/', methods=['POST'])
 def login():
+    required_fields = ['username', 'password']
+    for field in required_fields:
+        if not request.form[field]:
+            resp = make_response('missing_' + field)
+            resp.status_code = 400
+            return resp
+
     user = auth.authenticate(request.form['username'],
                              request.form['password'])
     if user:
@@ -149,17 +156,22 @@ def user_new_class():
     return resp
 
 
-# @app.route('/hw/new_assignment/', methods=['POST'])
-# def hw_new_assignment():
-#     # this probably isn't going to work: you should think it out before actually testing this
-#     new_assignment = str([a for a in HomeworkAssignment.select()][-1].id + 1) + '.jpg'
-#     with open(os.path.join(app.config['MEDIA_ROOT'], new_assignment), 'w') as f:
-#         f.write(request.form['b64_photo'])
+@app.route('/hw/new_assignment/', methods=['POST'])
+def hw_new_assignment():
+    # this probably isn't going to work: you should think it out before actually testing this
+    # new_assignment = str([a for a in HomeworkAssignment.select()][-1].id + 1) + '.jpg'
+    # with open(os.path.join(app.config['MEDIA_ROOT'], new_assignment), 'w') as f:
+        # f.write(request.form['b64_photo'])
 
-#     hw = HomeworkAssignment(school_class=SchoolClass.get(id=request.form['class']),
-#                             poster=auth.get_logged_in_user(),
-#                             photo=os.path.join(app.config['MEDIA_ROOT'], new_assignment),
-#                             thumbnail=os.path.join(app.config))
+    hw = HomeworkAssignment(school_class=SchoolClass.get(id=request.form['class']),
+                            poster=auth.get_logged_in_user())
+    if request.form['b64_photo']:
+        hw.save_photo(request.form['b64_photo'])
+    hw.save()
+
+    resp = make_response()
+    resp.status_code = 200
+    return resp
 
 
 def process_assignments(assignments, reverse=False):
