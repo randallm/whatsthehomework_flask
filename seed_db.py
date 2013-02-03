@@ -42,6 +42,7 @@ def add_more_assignments(assignments=20):
                                            poster=auth.User.get(id=1),
                                            date_posted=fake_now,
                                            date_due=fake_now + datetime.timedelta(days=1),
+                                           description="Lorum ipsum dolor python; ruby c lua javascript cubone pikachu charmander bicycle races are coming your way! When u were young u were the King of Carrot Flowers. :)",
                                            thumbnail=os.path.join(app.config['MEDIA_ROOT'], 't1.jpg'))
         hw_assignment.save()
 

@@ -1,6 +1,7 @@
 from wth import app, auth
 from flask import request, jsonify, make_response
 from wth.models import StudentClass, SchoolClass, School
+from wth.humanize_date import humanize_date
 import lepl.apps.rfc3696
 import base64
 import os
@@ -183,13 +184,9 @@ def process_assignments(assignments, reverse=False):
     else:
         counter = len(assignments) - 1
 
-    def unicode_to_epoch(t):
+    def unicode_to_human_time(u):
         DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S.%f'
-
-        t = datetime.datetime.strptime(t[:-6], DATETIME_FORMAT)  # strip tzinfo
-        t = t.utctimetuple()
-        t = calendar.timegm(t)
-        return str(t)
+        return datetime.datetime.strptime(u[:-6], DATETIME_FORMAT)  # strip tzinfo
 
     for assignment in assignments:
         if assignment.thumbnail:
@@ -202,8 +199,8 @@ def process_assignments(assignments, reverse=False):
             'pk': assignment.id,
             'poster': assignment.poster.username,
             'thumbnail': thumbnail,
-            'date_posted': unicode_to_epoch(assignment.date_posted),
-            'date_due': unicode_to_epoch(assignment.date_due),
+            'date_posted': humanize_date(unicode_to_human_time(assignment.date_posted)),
+            'date_due': humanize_date(unicode_to_human_time(assignment.date_posted)),
             'description': assignment.description
         }
         if reverse:
