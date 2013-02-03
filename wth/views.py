@@ -5,6 +5,7 @@ import lepl.apps.rfc3696
 import base64
 import os
 import re
+import calendar
 
 # for queries being eval()'d:
 from wth import db
@@ -192,6 +193,14 @@ def process_assignments(assignments, reverse=False):
     else:
         counter = len(assignments) - 1
 
+    def unicode_to_epoch(t):
+        DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S.%f'
+
+        t = datetime.datetime.strptime(t[:-6], DATETIME_FORMAT)  # strip tzinfo
+        t = t.utctimetuple()
+        t = calendar.timegm(t)
+        return str(t)
+
     for assignment in assignments:
         if assignment.thumbnail:
             with open(assignment.thumbnail, 'rb') as f:
@@ -203,8 +212,8 @@ def process_assignments(assignments, reverse=False):
             'pk': assignment.id,
             'poster': assignment.poster.username,
             'thumbnail': thumbnail,
-            'date_posted': str(assignment.date_posted),
-            'date_due': str(assignment.date_due),
+            'date_posted': unicode_to_epoch(assignment.date_posted),
+            'date_due': unicode_to_epoch(assignment.date_due),
             'description': assignment.description
         }
         if reverse:
