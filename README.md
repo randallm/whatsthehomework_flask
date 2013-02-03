@@ -76,7 +76,7 @@ Returns newest 15 assignments associated with a user's classes.
             "poster": "admin",
             "pk": 20,
             "thumbnail": "/9j/4AAQSkZJRgABAQAAAQABAAD//",
-            "date_assigned": "2013-01-29 02:13:15.890840+00:00"
+            "date_posted": "2013-01-29 02:13:15.890840+00:00"
           },
           "1": {
             "date_due": "2013-01-30 02:49:20.160159+00:00",
@@ -84,7 +84,7 @@ Returns newest 15 assignments associated with a user's classes.
             "poster": "admin",
             "pk": 19,
             "thumbnail": "/9j/4AAQSkZJRgABAQAAAQABAAD//",
-            "date_assigned": "2013-01-29 02:13:15.890840+00:00"
+            "date_posted": "2013-01-29 02:13:15.890840+00:00"
           }
         }
       ]

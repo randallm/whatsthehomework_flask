@@ -203,7 +203,7 @@ def process_assignments(assignments, reverse=False):
             'pk': assignment.id,
             'poster': assignment.poster.username,
             'thumbnail': thumbnail,
-            'date_assigned': str(assignment.date_assigned),
+            'date_posted': str(assignment.date_posted),
             'date_due': str(assignment.date_due),
             'description': assignment.description
         }

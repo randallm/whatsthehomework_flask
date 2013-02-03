@@ -72,11 +72,9 @@ class HomeworkAssignment(db.Model):
     photo = CharField(default='')
     thumbnail = CharField(default='')
 
-    date_assigned = DateTimeField(default=datetime.datetime.utcnow() \
+    date_posted = DateTimeField(default=datetime.datetime.utcnow() \
                                         .replace(tzinfo=utc))
-    date_due = DateTimeField(default=datetime.datetime.utcnow() \
-                                          .replace(tzinfo=utc) \
-                                          + datetime.timedelta(days=3))
+    date_due = DateTimeField()
 
     description = TextField(max_length=1000,
                             default='')
