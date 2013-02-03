@@ -200,7 +200,7 @@ def process_assignments(assignments, reverse=False):
             'poster': assignment.poster.username,
             'thumbnail': thumbnail,
             'date_posted': humanize_date(unicode_to_human_time(assignment.date_posted)),
-            'date_due': humanize_date(unicode_to_human_time(assignment.date_posted)),
+            'date_due': humanize_date(unicode_to_human_time(assignment.date_due)),
             'description': assignment.description
         }
         if reverse:
