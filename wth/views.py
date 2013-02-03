@@ -36,16 +36,6 @@ def login():
         return resp
 
 
-@app.route('/user/logout/')
-def logout():
-    if auth.get_logged_in_user():
-        auth.logout_user()
-
-    resp = make_response()
-    resp.status_code = 200
-    return resp
-
-
 @app.route('/user/verify_logged_in/')
 def verify_logged_in():
     if auth.get_logged_in_user():

@@ -18,11 +18,6 @@ API - User/Authentication
 Required: 'username', 'password'
 Returns session cookie.
 
-`GET /user/logout/`
-
-Deprecated, subject to removal.
-Expires session cookie in browser.
-
 `GET /user/verify_logged_in/`
 
 If user logged in, returns 200. Else, returns 400.
