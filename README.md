@@ -3,10 +3,10 @@ What's the Homework
 
 What's the Homework (WTH) is an Android collaborative homework manager app. Students can share and upload homework assignments and view them in Facebook-esque news feeds.
 
-Android Client
---------------
+Future Plans
+------------
 
-Android client is hosted at [randallm/whatsthehomework_android](https://github.com/randallm/whatsthehomework_android).
+I originally started this project with the intent of reimplementing many of the features available in social networking sites. However, I recently realized getting my peers to switch all switch from our existing homework sharing mediums to a service that I built is unpragmatic at best. As a result, this server client is being put on the backburner as I migrate [the Android app](https://github.com/randallm/whatsthehomework_android) to take advantage of a local database and existing sharing platforms, like NFC and existing social networks.
 
 API Calls
 ---------
